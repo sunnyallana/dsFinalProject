@@ -19,11 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="avlTree.h" />
     <ClInclude Include="linkedList.h" />
+    <ClInclude Include="loginManager.h" />
     <ClInclude Include="post.h" />
     <ClInclude Include="user.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="avlTree.cpp" />
     <ClCompile Include="post.cpp" />
     <ClCompile Include="user.cpp" />
     <ClCompile Include="main.cpp" />
