@@ -1,45 +1,43 @@
-#pragma once
 #ifndef AVL_TREE_H
 #define AVL_TREE_H
 
-template <typename Key, typename Value>
+template <typename T>
+class avlNode {
+public:
+    T data;
+    avlNode<T>* left;
+    avlNode<T>* right;
+    int height;
+
+    avlNode(T val) : data(val), left(nullptr), right(nullptr), height(1) {}
+};
+
+template <typename T>
 class avlTree {
 private:
-    struct Node {
-        Key key;
-        Value value;
-        Node* left;
-        Node* right;
-        int height;
+    avlNode<T>* root;
 
-        Node(const Key& k, const Value& v)
-            : key(k), value(v), left(nullptr), right(nullptr), height(1) {}
-    };
-
-    Node* root;
-
-    // Helper functions
-    int height(Node* node);
-    int balanceFactor(Node* node);
-    Node* rotateRight(Node* y);
-    Node* rotateLeft(Node* x);
-    Node* balance(Node* node);
-    Node* insert(Node* node, const Key& key, const Value& value);
-    Node* findMin(Node* node);
-    Node* removeMin(Node* node);
-    Node* remove(Node* node, const Key& key);
-    void destroy(Node* node);
-    void inOrderTraversal(Node* node, void (*visit)(const Key&, const Value&));
+    int height(avlNode<T>* node);
+    int balanceFactor(avlNode<T>* node);
+    avlNode<T>* rotateRight(avlNode<T>* y);
+    avlNode<T>* rotateLeft(avlNode<T>* x);
 
 public:
-    // Constructor and Destructor
     avlTree();
     ~avlTree();
 
-    // Public functions
-    void insert(const Key& key, const Value& value);
-    void remove(const Key& key);
-    bool search(const Key& key, Value& value);
-    void printInOrder();
+    void insert(T key);
+    void remove(T key);
+    bool search(T key);
+    void printInorder();
+
+private:
+    avlNode<T>* insertUtil(avlNode<T>* node, T key);
+    avlNode<T>* removeUtil(avlNode<T>* root, T key);
+    avlNode<T>* minValueNode(avlNode<T>* node);
+    void inorderUtil(avlNode<T>* root);
 };
+
 #endif // AVL_TREE_H
+
+
