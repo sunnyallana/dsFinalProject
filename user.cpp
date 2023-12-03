@@ -46,6 +46,19 @@ int user::getCurrentFriendsCount() const {
     return currentFriendsCount;
 }
 
+void user::setPostsByUserHead(listNode<post*>* receiveHead) {
+    postsByUser.setHead(receiveHead);
+}
+
+listNode<post*>* user::getPostsByUser(){
+    return postsByUser.getHead();
+}
+
+listNode<user*>* user::getUserFriends() {
+    return userFriends.getHead();
+}
+
+
 user::user(string receiveUserName, string receiveUserPassword)
     : currentFriendsCount(0), currentPostsCount(0), userId(nextUserId++) {
     userName = receiveUserName;

@@ -8,7 +8,7 @@
 #include "post.h"
 using namespace std;
 
-class post; // Forward declaration
+class post;
 
 class user {
 private:
@@ -30,12 +30,15 @@ public:
     void setUserPassword(const string& password);
     void setCurrentPostsCount(const int& receiveCurrentPostsCount);
     void setCurrentFriendsCount(const int& receiveCurrentFriendsCount);
+    void setPostsByUserHead(listNode<post*>* receiveHead);
     // Getter for user attributes
     string getUserName() const;
     string getUserPassword() const;
     int getUserId() const;
     int getCurrentPostsCount() const;
     int getCurrentFriendsCount() const;
+    listNode<post*>* getPostsByUser();
+    listNode<user*>* getUserFriends();
 
     user(string receiveUserName, string receiveUserPassword);
 

@@ -22,6 +22,7 @@
     <ClInclude Include="avlTree.h" />
     <ClInclude Include="linkedList.h" />
     <ClInclude Include="loginManager.h" />
+    <ClInclude Include="networkAnalyzer.h" />
     <ClInclude Include="post.h" />
     <ClInclude Include="user.h" />
   </ItemGroup>
