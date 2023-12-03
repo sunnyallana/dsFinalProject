@@ -17,6 +17,7 @@ private:
     listNode<dataType>* head;
 public:
     listNode<dataType>* getHead() { return head; }
+    void setHead(listNode<dataType>* newHead) { head = newHead; }
     linkedList() : head(nullptr) {}
     ~linkedList() {
         clear();

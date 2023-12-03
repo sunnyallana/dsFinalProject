@@ -13,8 +13,8 @@ class post; // Forward declaration
 class user {
 private:
     // Login credentials
-    std::string userName;
-    std::string userPassword;
+    string userName;
+    string userPassword;
     // Connectivity
     linkedList<user*> userFriends;
     linkedList<post*> postsByUser;
@@ -23,9 +23,7 @@ private:
     static int nextUserId;
     int currentPostsCount;
     int currentFriendsCount;
-
     user(); // private constructor
-
 public:
     // Setter for user attributes
     void setUserName(const string& receiveUserName);
