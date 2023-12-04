@@ -82,7 +82,6 @@ void post::displayUsersThatLiked() {
     }
 }
 
-
 void post::display() {
     cout << "Post ID: " << postId << endl;
     cout << "Post Name: " << postName << endl;

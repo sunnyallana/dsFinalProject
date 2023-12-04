@@ -1,13 +1,154 @@
 #include <iostream>
-#include "user.h"
+#include <cstdlib>
+#include <fstream>
+#include <queue>
 #include "post.h"
-using namespace std;
+#include "user.h"
+#include <string>
+#include <windows.h>
 
+using namespace std;
 
 class NetworkAnalyser {
 private:
     linkedList<user*> userNetwork;
     int uCount;
+    const string fileName = "users.txt";
+    const string friendsFileName = "friends.txt";
+
+    void writeUsersToFile() {
+        ofstream outFile(fileName);
+        if (outFile.is_open()) {
+            listNode<user*>* temp = userNetwork.getHead();
+            while (temp) {
+                outFile << temp->data->getUserId() << " " << temp->data->getUserName() << " " << temp->data->getUserPassword() << endl;
+                temp = temp->next;
+            }
+            outFile.close();
+        }
+        else {
+            cout << "Error writing to file." << endl;
+        }
+    }
+
+    void updateFriendsFile() {
+        ifstream inFile(friendsFileName);
+        if (!inFile.is_open()) {
+            cout << "Error reading from friends file." << endl;
+            return;
+        }
+
+        queue<string> linesQueue;
+        string line;
+        while (getline(inFile, line)) {
+            linesQueue.push(line);
+        }
+        inFile.close();
+
+        ofstream outFile(friendsFileName);
+        if (!outFile.is_open()) {
+            cout << "Error writing to friends file." << endl;
+            return;
+        }
+
+        listNode<user*>* temp = userNetwork.getHead();
+        while (temp) {
+            string userLine = to_string(temp->data->getUserId()) + " " + temp->data->getUserName() + " ";
+            listNode<user*>* friendsTemp = temp->data->getUserFriends();
+            while (friendsTemp) {
+                userLine += friendsTemp->data->getUserName() + " ";
+                friendsTemp = friendsTemp->next;
+            }
+
+            if (!linesQueue.empty() && linesQueue.front().find(temp->data->getUserName()) != string::npos) {
+                linesQueue.front() = userLine;
+            }
+            else {
+                linesQueue.push(userLine);
+            }
+
+            temp = temp->next;
+        }
+
+        while (!linesQueue.empty()) {
+            outFile << linesQueue.front() << endl;
+            linesQueue.pop();
+        }
+
+        outFile.close();
+    }
+
+    void savePostToFile(const string& userName, post* newPost) {
+        ofstream outFile(userName + ".txt", ios::app); // Open or create user's file in append mode
+        if (outFile.is_open()) {
+            outFile << newPost->getPostName() << " " << newPost->getPostDescription() << endl;
+            outFile.close();
+        }
+        else {
+            cout << "Error writing to user's file." << endl;
+        }
+    }
+
+    void removePostFromFile(const string& userName, post* removedPost) {
+        ifstream inFile(userName + ".txt");
+        if (inFile.is_open()) {
+            ofstream outFile(userName + "_temp.txt");
+            string line;
+            while (getline(inFile, line)) {
+                size_t pos = line.find(' ');  // Find the position of the first space
+                if (pos != string::npos) {
+                    string postName = line.substr(0, pos);  // Extract postName
+
+                    if (postName != removedPost->getPostName()) {
+                        outFile << line << endl;
+                    }
+                }
+                else {
+                    cout << "Error reading post information from the file." << endl;
+                }
+            }
+            inFile.close();
+            outFile.close();
+            DeleteFile((userName + ".txt").c_str());
+            MoveFile((userName + "_temp.txt").c_str(), (userName + ".txt").c_str());
+        }
+        else {
+            cout << "Error reading from user's file." << endl;
+        }
+    }
+
+    void editPostInFile(const string& userName, const string& oldPostName, const string& newPostName, const string& newPostDes) {
+        ifstream inFile(userName + ".txt");
+        if (inFile.is_open()) {
+            ofstream outFile(userName + "_temp.txt");
+            string line;
+            while (getline(inFile, line)) {
+                size_t pos = line.find(' ');  // Find the position of the first space
+                if (pos != string::npos) {
+                    string postName = line.substr(0, pos);  // Extract postName
+
+                    if (postName == oldPostName) {
+                        outFile << newPostName << " " << newPostDes << endl;
+                    }
+                    else {
+                        outFile << line << endl;
+                    }
+                }
+                else {
+                    cout << "Error reading post information from the file." << endl;
+                }
+            }
+            inFile.close();
+            outFile.close();
+
+            // Rename the temporary file to the original file
+            DeleteFile((userName + ".txt").c_str());
+            MoveFile((userName + "_temp.txt").c_str(), (userName + ".txt").c_str());
+        }
+        else {
+            cout << "Error reading from user's file." << endl;
+        }
+    }
 
 public:
     NetworkAnalyser() : uCount(0) {}
@@ -33,6 +174,7 @@ public:
         return nullptr;
     }
 
+
     void addUser(const string& userName, const string& userPassword) {
         listNode<user*>* temp = userNetwork.getHead();
         while (temp) {
@@ -46,7 +188,16 @@ public:
         user* newUser = new user(userName, userPassword);
         userNetwork.insert(newUser);
         uCount++;
-        cout << "User added successfully." << endl;
+
+        ofstream outFile(fileName, ios::app); // Open file in append mode
+        if (outFile.is_open()) {
+            outFile << newUser->getUserId() << " " << userName << " " << userPassword << endl;
+            outFile.close();
+            cout << "User added successfully." << endl;
+        }
+        else {
+            cout << "Error writing to file." << endl;
+        }
     }
 
     void removeUser(const string& userName) {
@@ -61,6 +212,9 @@ public:
                 else {
                     userNetwork.setHead(temp->next);
                 }
+
+                writeUsersToFile();
+
                 delete temp->data;
                 delete temp;
                 cout << "User removed successfully." << endl;
@@ -75,17 +229,54 @@ public:
     }
 
     void displayUsers() {
-        listNode<user*>* temp = userNetwork.getHead();
-        while (temp) {
-            cout << "User ID: " << temp->data->getUserId() << ", User Name: " << temp->data->getUserName() << endl;
-            temp = temp->next;
+        ifstream inFile(fileName);
+        if (inFile.is_open()) {
+            cout << "Users:" << endl;
+            string line;
+            while (getline(inFile, line)) {
+                size_t pos1 = line.find(' ');  // Find the position of the first space
+                size_t pos2 = line.find(' ', pos1 + 1);  // Find the position of the second space
+                if (pos1 != string::npos && pos2 != string::npos) {
+                    string userIdStr = line.substr(0, pos1);
+                    string userName = line.substr(pos1 + 1, pos2 - pos1 - 1);
+                    string userPassword = line.substr(pos2 + 1);
+
+                    int userId;
+                    if (tryStringToInt(userIdStr, userId)) {
+                        cout << "User ID: " << userId << ", User Name: " << userName << endl;
+                    }
+                    else {
+                        cout << "Error converting User ID to integer." << endl;
+                    }
+                }
+                else {
+                    cout << "Error reading user information from the file." << endl;
+                }
+            }
+            inFile.close();
+        }
+        else {
+            cout << "Error reading from file." << endl;
+        }
+    }
+    bool tryStringToInt(const string& str, int& result) {
+        try {
+            size_t pos;
+            result = stoi(str, &pos);
+            return pos == str.length();  // Ensure the entire string was used in conversion
+        }
+        catch (const invalid_argument& e) {
+            return false;
+        }
+        catch (const out_of_range& e) {
+            return false;
         }
     }
 
-    void addFriend(const std::string& userName1, const std::string& userName2) {
+
+    void addFriend(const string& userName1, const string& userName2) {
         user* user1 = nullptr;
         user* user2 = nullptr;
-
 
         listNode<user*>* temp = userNetwork.getHead();
         while (temp) {
@@ -98,7 +289,6 @@ public:
 
             temp = temp->next;
 
-
             if (user1 && user2) {
                 break;
             }
@@ -107,6 +297,7 @@ public:
         if (user1 && user2) {
             user1->addFriend(user2);
             user2->addFriend(user1);
+            updateFriendsFile();
             cout << "Friend added successfully." << endl;
         }
         else {
@@ -137,6 +328,7 @@ public:
         if (user1 && user2) {
             user1->removeFriend(user2);
             user2->removeFriend(user1);
+            updateFriendsFile();
             cout << "Friend removed successfully." << endl;
         }
         else {
@@ -158,6 +350,10 @@ public:
 
         if (currentUser) {
             post* newPost = new post(currentUser, postName, postDes);
+            currentUser->createPost(newPost);
+
+            savePostToFile(currentUser->getUserName(), newPost);
+
             cout << "Post added successfully." << endl;
         }
         else {
@@ -189,6 +385,10 @@ public:
                     else {
                         currentUser->setPostsByUserHead(postTemp->next);
                     }
+
+                    // Remove post from user's file
+                    removePostFromFile(currentUser->getUserName(), postTemp->data);
+
                     delete postTemp->data;
                     delete postTemp;
                     cout << "Post removed successfully." << endl;
@@ -204,7 +404,6 @@ public:
             cout << "User not found." << endl;
         }
     }
-
 
     void editPost(const string& userName, const string& oldPostName, const string& newPostName, const string& newPostDes) {
         user* currentUser = nullptr;
@@ -225,6 +424,9 @@ public:
                 if (postTemp->data->getPostName() == oldPostName) {
                     postTemp->data->setPostName(newPostName);
                     postTemp->data->setPostDescription(newPostDes);
+
+                    editPostInFile(currentUser->getUserName(), oldPostName, newPostName, newPostDes);
+
                     cout << "Post edited successfully." << endl;
                     return;
                 }
@@ -325,3 +527,193 @@ public:
     }
 
 };
+
+void clearScreen() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
+void delay(int milliseconds) {
+    Sleep(milliseconds);
+}
+
+int main() {
+    NetworkAnalyser analyzer;
+
+    int choice;
+got:
+    do {
+        cout << "\n\t\t\t   SOCIAL NETWORK ANALYSER\n";
+        cout << "\t\t\t\t     WELCOME!\n";
+
+
+        cout << "\n\t\t\t----------------------------\n\n";
+        cout << "\t\t\t\t  Main Menu\n";
+        cout << "\n\t\t\t----------------------------\n";
+        cout << "\t\t\t|  1. Add User             |\n";
+        cout << "\t\t\t|  2. Remove User          |\n";
+        cout << "\t\t\t|  3. Add Friend           |\n";
+        cout << "\t\t\t|  4. Remove Friend        |\n";
+        cout << "\t\t\t|  5. Add Post             |\n";
+        cout << "\t\t\t|  6. Edit Post            |\n";
+        cout << "\t\t\t|  7. Remove Post          |\n";
+        cout << "\t\t\t|  8. Display User Posts   |\n";
+        cout << "\t\t\t|  9. Display Friends      |\n";
+        cout << "\t\t\t| 10. Find Mutual Friends  |\n";
+        cout << "\t\t\t|  0. Exit                 |\n";
+        cout << "\t\t\t----------------------------\n";
+        cout << "\t\t\t  Enter your choice: ";
+        cin >> choice;
+
+        clearScreen();
+
+        switch (choice) {
+        case 1: {
+            cout << "\n\n\t\tUser Addition\n\n";
+            string userName, userPassword;
+            cout << "Enter user name: ";
+            cin >> userName;
+            cout << "Enter user password: ";
+            cin >> userPassword;
+            cout << "Adding user " << userName << "!\n";
+            analyzer.addUser(userName, userPassword);
+            delay(2000);
+            clearScreen();
+            break;
+        }
+        case 2: {
+            cout << "\n\n\t\tUser Removal\n\n";
+            string userName;
+            cout << "Enter user name to remove: ";
+            cin >> userName;
+            cout << "Removing user " << userName << "!\n";
+            analyzer.removeUser(userName);
+            delay(2000);
+            clearScreen();
+            break;
+        }
+        case 3: {
+            cout << "\n\n\t\tAdd Friend\n\n";
+            string userName1, userName2;
+            cout << "Enter user name who wants to add friend: ";
+            cin >> userName1;
+            cout << "Enter user name of the friend needed to be added: ";
+            cin >> userName2;
+            cout << "Adding friend " << userName2 << " for user " << userName1 << "!\n";
+            analyzer.addFriend(userName1, userName2);
+            delay(2000);
+            clearScreen();
+            break;
+        }
+        case 4: {
+            cout << "\n\n\t\tRemove Friend\n\n";
+            string userName1, userName2;
+            cout << "Enter user name from whom to remove friend: ";
+            cin >> userName1;
+            cout << "Enter user name of the friend to remove: ";
+            cin >> userName2;
+            cout << "Removing friend " << userName2 << " from user " << userName1 << "!\n";
+            analyzer.removeFriend(userName1, userName2);
+            delay(2000);
+            clearScreen();
+            break;
+        }
+        case 5: {
+            cout << "\n\n\t\tAdd Post\n\n";
+            string userName, postName, postDes;
+            cout << "Enter user name: ";
+            cin >> userName;
+            cout << "Enter post name: ";
+            cin >> postName;
+            cout << "Enter post description: ";
+            cin.ignore(); // Ignore the newline character in the buffer
+            getline(cin, postDes);
+            cout << "Creating post " << postName << " for user " << userName << "!\n";
+            analyzer.addPost(userName, postName, postDes);
+            delay(2000);
+            clearScreen();
+            break;
+        }
+        case 6: {
+            cout << "\n\n\t\tEdit Post\n\n";
+            string userName, oldPostName, newPostName, newPostDes;
+            cout << "Enter user name: ";
+            cin >> userName;
+            cout << "Enter old post name: ";
+            cin >> oldPostName;
+            cout << "Enter new post name: ";
+            cin >> newPostName;
+            cout << "Enter new post description: ";
+            cin.ignore(); // Ignore the newline character in the buffer
+            getline(cin, newPostDes);
+            cout << "Editing post " << oldPostName << " for user " << userName << "!\n";
+            analyzer.editPost(userName, oldPostName, newPostName, newPostDes);
+            delay(2000);
+            clearScreen();
+            break;
+        }
+        case 7: {
+            cout << "\n\n\t\tRemove Post\n\n";
+            string userName, postName;
+            cout << "Enter user name: ";
+            cin >> userName;
+            cout << "Enter post name to remove: ";
+            cin >> postName;
+            cout << "Removing post " << postName << " for user " << userName << "!\n";
+            analyzer.removePost(userName, postName);
+            delay(2000);
+            clearScreen();
+            break;
+        }
+        case 8: {
+            cout << "\n\n\t\tDisplay Posts\n\n";
+            string userName;
+            cout << "Enter user name: ";
+            cin >> userName;
+            cout << "Displaying " << userName << "'s posts!\n";
+            analyzer.displayUserPosts(userName);
+            delay(2000);
+            clearScreen();
+            break;
+        }
+        case 9: {
+            cout << "\n\n\t\tDisplay Freinds\n\n";
+            string userName;
+            cout << "Enter user name: ";
+            cin >> userName;
+            cout << "Displaying friends of " << userName << "!\n";
+            analyzer.displayFriends(userName);
+            delay(2000);
+            clearScreen();
+            break;
+        }
+        case 10: {
+            cout << "\n\n\t\tFind Mutual Friends\n\n";
+            string userName1, userName2;
+            cout << "Enter user name 1: ";
+            cin >> userName1;
+            cout << "Enter user name 2: ";
+            cin >> userName2;
+            cout << "Displaying friends of " << userName1 << "& " << userName2 << "!" << endl;
+            analyzer.findMutualFriends(userName1, userName2);
+            delay(2000);
+            clearScreen();
+            break;
+        }
+        case 0:
+            cout << "Exiting...\n";
+            break;
+        default:
+            cout << "Invalid choice. Please try again.\n";
+        }
+
+        delay(1000);
+        clearScreen();
+
+    } while (choice != 0);
+
+    return 0;
+}

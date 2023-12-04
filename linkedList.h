@@ -1,6 +1,8 @@
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
 
+#include <iostream>
+using namespace std;
 
 template <class dataType>
 class listNode {
@@ -60,10 +62,10 @@ public:
     void display() {
         listNode<dataType>* temp = head;
         while (temp) {
-            std::cout << temp->data << " ";
+            cout << temp->data << " ";
             temp = temp->next;
         }
-        std::cout << std::endl;
+        cout << endl;
     }
     bool search(dataType receiveValue) {
         listNode<dataType>* temp = head;

@@ -121,8 +121,8 @@ avlNode<dataType>* avlTree<dataType>::rotateRight(avlNode<dataType>* y) {
     avlNode<dataType>* T2 = x->right;
     x->right = y;
     y->left = T2;
-    y->height = std::max(height(y->left), height(y->right)) + 1;
-    x->height = std::max(height(x->left), height(x->right)) + 1;
+    y->height = max(height(y->left), height(y->right)) + 1;
+    x->height = max(height(x->left), height(x->right)) + 1;
     return x;
 }
 
@@ -132,8 +132,8 @@ avlNode<dataType>* avlTree<dataType>::rotateLeft(avlNode<dataType>* x) {
     avlNode<dataType>* T2 = y->left;
     y->left = x;
     x->right = T2;
-    x->height = std::max(height(x->left), height(x->right)) + 1;
-    y->height = std::max(height(y->left), height(y->right)) + 1;
+    x->height = max(height(x->left), height(x->right)) + 1;
+    y->height = max(height(y->left), height(y->right)) + 1;
     return y;
 }
 
@@ -147,7 +147,7 @@ avlNode<dataType>* avlTree<dataType>::insertUtil(avlNode<dataType>* node, dataTy
     else
         return node;
 
-    node->height = 1 + std::max(height(node->left), height(node->right));
+    node->height = 1 + max(height(node->left), height(node->right));
 
     int balance = balanceFactor(node);
 
@@ -215,7 +215,7 @@ avlNode<dataType>* avlTree<dataType>::removeUtil(avlNode<dataType>* root, dataTy
         }
     }
     if (root == nullptr) return root;
-    root->height = 1 + std::max(height(root->left), height(root->right));
+    root->height = 1 + max(height(root->left), height(root->right));
     int balance = balanceFactor(root);
     // Left Left Case
     if (balance > 1 && balanceFactor(root->left) >= 0)

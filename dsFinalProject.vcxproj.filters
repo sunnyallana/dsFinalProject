@@ -30,18 +30,15 @@
     <ClInclude Include="avlTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="networkAnalyzer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="post.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="user.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
