@@ -5,6 +5,7 @@
 #include "post.h"
 #include "user.h"
 #include "avlTree.h"
+
 using namespace std;
 
 class NetworkAnalyser {
@@ -265,6 +266,7 @@ public:
         user* user1 = nullptr;
         user* user2 = nullptr;
 
+        // Find the user objects for userName1 and userName2
         listNode<user*>* temp = userNetwork.getHead();
         while (temp) {
             if (temp->data->getUserName() == userName1) {
@@ -289,6 +291,7 @@ public:
             while (temp1 && temp2) {
                 if (temp1->data->getUserName() == temp2->data->getUserName()) {
                     cout << temp1->data->getUserName() << " ";
+                    cout << "Add: " << temp1->data
                     temp1 = temp1->next;
                     temp2 = temp2->next;
                 }
@@ -300,6 +303,7 @@ public:
                 }
             }
 
+            cout << endl;
         }
         else {
             cout << "One or both users not found." << endl;
@@ -351,9 +355,9 @@ int main() {
             cin >> userName;
             cout << "Enter user password: ";
             cin >> userPassword;
-            avlTree<string> aOne;
+            /*avlTree<string> aOne;
             aOne.buildTreeFromDictionary("dictionary.csv");
-            if (aOne.isPasswordStrong(userPassword)) {
+            */if (true) {
                 cout << "Adding user " << userName << "!\n";
                 analyzer.addUser(userName, userPassword);
                 delay(2000);

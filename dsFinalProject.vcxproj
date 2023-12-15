@@ -23,6 +23,7 @@
     <ClInclude Include="linkedList.h" />
     <ClInclude Include="loginManager.h" />
     <ClInclude Include="post.h" />
+    <ClInclude Include="queue.h" />
     <ClInclude Include="user.h" />
   </ItemGroup>
   <ItemGroup>

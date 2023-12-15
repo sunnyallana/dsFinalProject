@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <fstream>
 #include <string>
+#include "queue.h"
 using namespace std;
 
 template <class dataType>
@@ -38,7 +39,7 @@ public:
     void printInorder();
     bool isPasswordStrong(const dataType& password);
     void buildTreeFromDictionary(const string& dictionaryFileName);
-
+    void levelOrderTraversal();
 private:
     avlNode<dataType>* insertUtil(avlNode<dataType>* node, dataType key);
     avlNode<dataType>* removeUtil(avlNode<dataType>* root, dataType key);
@@ -85,6 +86,32 @@ void avlTree<dataType>::inorderUtil(avlNode<dataType>* root) {
         cout << root->data << " ";
         inorderUtil(root->right);
     }
+}
+
+template <class dataType>
+void avlTree<dataType>::levelOrderTraversal() {
+    if (root == nullptr) {
+        cout << "Tree is empty." << endl;
+        return;
+    }
+
+    Queue<avlNode<dataType>*> q;
+    q.enqueue(root);
+
+    while (!q.isEmpty()) {
+        avlNode<dataType>* current = q.dequeue();
+        cout << current->data << " ";
+
+        if (current->left != nullptr) {
+            q.enqueue(current->left);
+        }
+
+        if (current->right != nullptr) {
+            q.enqueue(current->right);
+        }
+    }
+
+    cout << endl;
 }
 
 template <class dataType>

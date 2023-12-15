@@ -30,6 +30,9 @@
     <ClInclude Include="avlTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="post.cpp">
